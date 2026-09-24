@@ -107,7 +107,7 @@ body{
 .done-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:1rem}
 .done-thumb{aspect-ratio:3/4;border-radius:10px;overflow:hidden;border:1px solid rgba(196,96,122,.3)}
 .done-thumb img{width:100%;height:100%;object-fit:cover}
-.done-thumb.blank{background:rgba(42,16,40,.8);display:flex;align-items:center;justify-content:center;font-size:1.1rem;opacity:.35}
+.done-thumb.blank{background:#120810;}
 
 /* WAITING STATE */
 .wait-screen{text-align:center;padding:1.5rem 0}
@@ -307,7 +307,7 @@ function renderDone(container, day, slots, done, label){
     const im=el('img'); im.src=IMAGE_PATHS[i]; im.alt=''; d.appendChild(im); dg.appendChild(d);
   });
   slots.filter(i=>!done.includes(i)).forEach(()=>{
-    const d=el('div','done-thumb blank'); d.textContent='💗'; dg.appendChild(d);
+    const d=el('div','done-thumb blank'); dg.appendChild(d);
   });
   scr.appendChild(heart); scr.appendChild(txt); scr.appendChild(sub); scr.appendChild(dg);
   box.appendChild(scr); container.appendChild(box);
@@ -415,8 +415,11 @@ function onReveal(canvas, lotEl, imgIdx, day){
     // FIX: Do NOT lock anything — just let them pick the next one freely
   } else {
     showToast('Alle 3 Lose gerubbelt 💗');
-    // After 3rd reveal: re-render to show done state with locks on remaining
-    setTimeout(()=>{ if(day==='fri') renderFri(); else renderSun(); }, 1200);
+    // After 3rd reveal: re-render both panels
+    setTimeout(()=>{
+      if(day==='fri'){ renderFri(); renderSun(); }
+      else { renderSun(); }
+    }, 1200);
   }
 }
 
@@ -435,6 +438,9 @@ function switchTab(day){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('tab-'+day).classList.add('active');
   document.getElementById('panel-'+day).classList.add('active');
+  // Immer neu rendern beim Tab-Wechsel damit Sonntag aktuell ist
+  if(day==='sun') renderSun();
+  if(day==='fri') renderFri();
 }
 
 function el(tag,cls=''){const e=document.createElement(tag);if(cls)e.className=cls;return e;}
