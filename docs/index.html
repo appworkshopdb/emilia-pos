@@ -23,18 +23,13 @@ body{
 .stars{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
 .star{position:absolute;border-radius:50%;background:rgba(245,232,237,.6);animation:twinkle var(--d,3s) ease-in-out infinite}
 @keyframes twinkle{0%,100%{opacity:.2;transform:scale(1)}50%{opacity:.9;transform:scale(1.3)}}
-
 .page-wrap{position:relative;z-index:1;max-width:600px;margin:0 auto;padding:2.5rem 1.2rem 5rem;display:flex;flex-direction:column;align-items:center}
-
-/* HEADER */
 .header{text-align:center;margin-bottom:2rem}
 .eyebrow{font-size:.68rem;letter-spacing:.22em;color:var(--gold);text-transform:uppercase;margin-bottom:.6rem}
 .header h1{font-family:'Playfair Display',serif;font-size:2rem;font-weight:400;line-height:1.2}
 .header h1 em{font-style:italic;color:var(--rose-lt)}
 .header-sub{margin-top:.8rem;font-size:.85rem;color:var(--text-s);line-height:1.65;max-width:380px}
 .divider{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:1.2rem auto}
-
-/* TABS */
 .day-tabs{display:flex;gap:.6rem;margin-bottom:1.8rem;width:100%;max-width:420px}
 .tab-btn{
   flex:1;padding:.65rem 1rem;border:1px solid rgba(196,96,122,.3);border-radius:50px;
@@ -47,12 +42,8 @@ body{
   border-color:var(--rose);color:var(--text);box-shadow:0 0 18px rgba(196,96,122,.25)
 }
 .tab-btn small{display:block;font-size:.7rem;margin-top:.15rem;opacity:.65}
-
-/* PANEL */
 .panel{display:none;width:100%}
 .panel.active{display:block}
-
-/* GAME BOX */
 .game-box{
   background:rgba(42,16,40,.7);border:1px solid rgba(196,96,122,.2);border-radius:20px;
   padding:1.5rem 1.2rem;backdrop-filter:blur(12px)
@@ -65,25 +56,37 @@ body{
   border-radius:50px;padding:.3rem .9rem;font-size:.78rem;color:var(--text-s)
 }
 .game-counter .count{color:var(--rose-lt);font-weight:400}
-
-/* LOT GRID */
 .lot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem}
 
-.lot{aspect-ratio:3/4;border-radius:14px;position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.5)}
-.lot-img{width:100%;height:100%;object-fit:cover;display:block;border-radius:14px}
-
-/* Scratch canvas */
-.scratch-canvas{position:absolute;inset:0;border-radius:14px;touch-action:none;cursor:crosshair}
-.scratch-canvas.done{pointer-events:none;opacity:0;transition:opacity .7s}
-
-/* Lock overlay */
-.lock-overlay{
-  position:absolute;inset:0;border-radius:14px;
-  background:linear-gradient(145deg,rgba(26,10,24,.92),rgba(42,16,40,.95));
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.35rem;
-  pointer-events:none
+/* LOT: always same height, position relative for canvas overlay */
+.lot{
+  aspect-ratio:3/4;border-radius:14px;position:relative;overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,.5);
+  background:#1a0a18;
 }
-.lock-overlay .lock-icon{font-size:1.6rem;opacity:.45}
+
+/* Revealed image — hidden by default, shown only when revealed */
+.lot-img{
+  width:100%;height:100%;object-fit:cover;display:block;border-radius:14px;
+  position:absolute;inset:0;
+  opacity:0;transition:opacity .5s;
+}
+.lot.revealed .lot-img{ opacity:1; }
+
+/* Scratch canvas sits on top of the (invisible) image */
+.scratch-canvas{
+  position:absolute;inset:0;border-radius:14px;touch-action:none;cursor:crosshair;
+  z-index:2;
+}
+.scratch-canvas.fading{pointer-events:none;opacity:0;transition:opacity .7s}
+
+/* Solid cover for locked lots — completely hides the image */
+.lock-overlay{
+  position:absolute;inset:0;border-radius:14px;z-index:3;
+  background:#1a0a18;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.35rem;
+}
+.lock-overlay .lock-icon{font-size:1.6rem;opacity:.4}
 .lock-overlay .lock-text{font-size:.6rem;color:var(--text-s);letter-spacing:.08em;text-align:center;line-height:1.5;padding:0 .4rem}
 
 /* Revealed ribbon */
@@ -91,7 +94,7 @@ body{
   position:absolute;top:0;left:0;right:0;z-index:10;
   background:linear-gradient(135deg,rgba(196,96,122,.85),rgba(122,53,104,.85));
   color:#fff;font-size:.6rem;letter-spacing:.1em;text-align:center;
-  padding:.22rem .3rem;backdrop-filter:blur(4px);display:none
+  padding:.22rem .3rem;display:none
 }
 .lot.revealed .lot-ribbon{display:block}
 
@@ -133,7 +136,6 @@ body{
 </head>
 <body>
 <div class="stars" id="stars"></div>
-
 <div class="page-wrap">
   <header class="header">
     <p class="eyebrow">nur für dich</p>
@@ -141,7 +143,6 @@ body{
     <div class="divider"></div>
     <p class="header-sub">Wähle an jedem Tag drei Lose zum Rubbeln. Was wird sich wohl verstecken?</p>
   </header>
-
   <div class="day-tabs">
     <button class="tab-btn active" onclick="switchTab('fri')" id="tab-fri">
       💗 Freitag<small id="fri-date"></small>
@@ -150,48 +151,29 @@ body{
       🌹 Sonntag<small id="sun-date"></small>
     </button>
   </div>
-
   <div class="panel active" id="panel-fri"></div>
   <div class="panel"        id="panel-sun"></div>
-
   <footer class="footer"><p>mit viel Liebe für dich gemacht 🌸</p></footer>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-// ─────────────────────────────────────────────────────────────────────────────
-// CONFIGURATION — passe die Dateinamen an deine Bilder an
-// Lege alle Bilder in einen Ordner namens "images/" neben dieser index.html
-// ─────────────────────────────────────────────────────────────────────────────
+// ── BILDPFADE — passe die Dateinamen an ──────────────────────────────────────
 const IMAGE_PATHS = [
-  'images/1.jpg',
-  'images/2.jpg',
-  'images/3.jpg',
-  'images/4.jpg',
-  'images/5.jpg',
-  'images/6.jpg',
-  'images/7.jpg',
-  'images/8.jpg',
-  'images/9.jpg',
+  'images/1.jpg','images/2.jpg','images/3.jpg',
+  'images/4.jpg','images/5.jpg','images/6.jpg',
+  'images/7.jpg','images/8.jpg','images/9.jpg',
 ];
-// Falls du .png oder andere Formate nutzt, ändere einfach die Endung oben.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const LS = {
-  seed:      'rb_seed',       // Zufalls-Seed, einmalig gesetzt
-  friSlots:  'rb_fri_slots',  // 6 Bild-Indices für Freitag
-  sunSlots:  'rb_sun_slots',  // 6 Bild-Indices für Sonntag
-  friDone:   'rb_fri_done',   // Array gerubbelter Indices (Freitag)
-  sunDone:   'rb_sun_done',   // Array gerubbelter Indices (Sonntag)
-  friClosed: 'rb_fri_closed', // Bool — Freitag abgeschlossen
-  sunClosed: 'rb_sun_closed',
+  seed:'rb_seed', friSlots:'rb_fri_slots', sunSlots:'rb_sun_slots',
+  friDone:'rb_fri_done', sunDone:'rb_sun_done',
+  friClosed:'rb_fri_closed', sunClosed:'rb_sun_closed',
 };
-
 function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
 function lsSet(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 
-// ─── STATE ───────────────────────────────────────────────────────────────────
 let friSlots  = lsGet(LS.friSlots)  || null;
 let sunSlots  = lsGet(LS.sunSlots)  || null;
 let friDone   = lsGet(LS.friDone)   || [];
@@ -200,16 +182,11 @@ let friClosed = lsGet(LS.friClosed) || false;
 let sunClosed = lsGet(LS.sunClosed) || false;
 
 function save(){
-  lsSet(LS.friSlots,  friSlots);
-  lsSet(LS.sunSlots,  sunSlots);
-  lsSet(LS.friDone,   friDone);
-  lsSet(LS.sunDone,   sunDone);
-  lsSet(LS.friClosed, friClosed);
-  lsSet(LS.sunClosed, sunClosed);
+  lsSet(LS.friSlots,friSlots); lsSet(LS.sunSlots,sunSlots);
+  lsSet(LS.friDone,friDone);   lsSet(LS.sunDone,sunDone);
+  lsSet(LS.friClosed,friClosed); lsSet(LS.sunClosed,sunClosed);
 }
 
-// ─── SEEDED SHUFFLE ──────────────────────────────────────────────────────────
-// Gleiche Slots auf allen Geräten dieser Person dank gespeichertem Seed
 function mulberry32(seed){
   return function(){
     seed|=0; seed=seed+0x6D2B79F5|0;
@@ -218,53 +195,42 @@ function mulberry32(seed){
     return((t^t>>>14)>>>0)/4294967296;
   };
 }
-function seededShuffle(arr, rng){
+function seededShuffle(arr,rng){
   const a=arr.slice();
-  for(let i=a.length-1;i>0;i--){
-    const j=Math.floor(rng()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
-  }
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
   return a;
 }
 function getSeed(){
   let s=lsGet(LS.seed);
-  if(!s){ s=Math.floor(Math.random()*2**31); lsSet(LS.seed,s); }
+  if(s===null){ s=Math.floor(Math.random()*2147483647); lsSet(LS.seed,s); }
   return s;
 }
 
-// ─── SLOT ASSIGNMENT ─────────────────────────────────────────────────────────
 function assignFriSlots(){
   if(friSlots) return;
-  const rng=mulberry32(getSeed());
-  const all=seededShuffle([0,1,2,3,4,5,6,7,8],rng);
-  friSlots=all.slice(0,6);
+  friSlots = seededShuffle([0,1,2,3,4,5,6,7,8], mulberry32(getSeed())).slice(0,6);
   save();
 }
-
 function assignSunSlots(){
   if(sunSlots) return;
-  const excluded=new Set(friDone);
-  const remaining=[0,1,2,3,4,5,6,7,8].filter(i=>!excluded.has(i));
-  const rng=mulberry32(getSeed()+1);
-  const chosen=seededShuffle(remaining,rng).slice(0,6);
-  sunSlots=chosen;
+  const excl = new Set(friDone);
+  const rem  = [0,1,2,3,4,5,6,7,8].filter(i=>!excl.has(i));
+  sunSlots   = seededShuffle(rem, mulberry32(getSeed()+1)).slice(0,6);
   save();
 }
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
 function getDateLabel(weekday){
   const now=new Date(), diff=(weekday-now.getDay()+7)%7;
   const d=new Date(now); d.setDate(now.getDate()+(diff===0?0:diff));
   return d.toLocaleDateString('de-DE',{day:'numeric',month:'short'});
 }
-
 function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
   clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2800);
 }
 
-// ─── RENDER: GAME DAY ────────────────────────────────────────────────────────
+// ── RENDER GAME DAY ──────────────────────────────────────────────────────────
 function renderDay(panelId, day){
   const container=document.getElementById(panelId);
   container.innerHTML='';
@@ -274,30 +240,25 @@ function renderDay(panelId, day){
   const closed = day==='fri' ? friClosed : sunClosed;
   const label  = day==='fri' ? '💗 Freitag' : '🌹 Sonntag';
 
-  if(closed){
-    renderDone(container, day, slots, done, label); return;
-  }
+  if(closed){ renderDone(container,day,slots,done,label); return; }
 
   const box=el('div','game-box');
-
-  // Header
   const gh=el('div','game-header');
   const gt=el('p','game-title'); gt.textContent=label+' – Wähle deine 3 Lose';
   const gc=el('div','game-counter');
   gc.innerHTML=`<span class="count" id="cnt-${day}">${done.length}</span><span>/ 3 gerubbelt</span>`;
   gh.appendChild(gt); gh.appendChild(gc); box.appendChild(gh);
 
-  // Grid
   const grid=el('div','lot-grid');
   slots.forEach(imgIdx=>{
     const isRevealed = done.includes(imgIdx);
-    const isLocked   = !isRevealed && done.length>=3;
+    // FIX: Lock only when 3 already revealed AND this one isn't revealed
+    const isLocked   = !isRevealed && done.length >= 3;
     grid.appendChild(buildLot(imgIdx, day, isRevealed, isLocked));
   });
   box.appendChild(grid);
   container.appendChild(box);
 
-  // Init canvases after DOM is painted
   requestAnimationFrame(()=>{
     container.querySelectorAll('.scratch-canvas').forEach(canvas=>{
       const lot=canvas.closest('.lot');
@@ -307,20 +268,24 @@ function renderDay(panelId, day){
 }
 
 function buildLot(imgIdx, day, isRevealed, isLocked){
-  const lot=el('div','lot'+(isRevealed?' revealed':'')+(isLocked?' locked':''));
+  const lot=el('div','lot'+(isRevealed?' revealed':''));
 
+  // Image always in DOM but hidden via CSS until revealed
   const img=el('img','lot-img');
-  img.src=IMAGE_PATHS[imgIdx]; img.alt='Überraschungsbild';
+  img.src=IMAGE_PATHS[imgIdx]; img.alt='';
   lot.appendChild(img);
 
+  // Ribbon shown when revealed
   const ribbon=el('div','lot-ribbon'); ribbon.textContent='enthüllt ✨';
   lot.appendChild(ribbon);
 
   if(isLocked){
+    // Solid opaque cover — no image visible
     const ov=el('div','lock-overlay');
     ov.innerHTML='<span class="lock-icon">🔒</span><span class="lock-text">Heute nicht mehr möglich</span>';
     lot.appendChild(ov);
   } else if(!isRevealed){
+    // Scratchable canvas (drawn opaque by initScratch)
     const canvas=el('canvas','scratch-canvas');
     canvas.dataset.idx=imgIdx; canvas.dataset.day=day;
     lot.appendChild(canvas);
@@ -328,34 +293,26 @@ function buildLot(imgIdx, day, isRevealed, isLocked){
   return lot;
 }
 
-// ─── RENDER: DONE ────────────────────────────────────────────────────────────
+// ── RENDER DONE ──────────────────────────────────────────────────────────────
 function renderDone(container, day, slots, done, label){
   const box=el('div','game-box');
   const scr=el('div','done-screen');
-
   const heart=el('span','done-heart'); heart.textContent='💗';
   const txt=el('p','done-text');
   txt.textContent=`"Deine ${day==='fri'?'Freitag':'Sonntag'}überraschungen sind enthüllt."`;
   const sub=el('p','done-sub'); sub.textContent='3 von 6 Losen gerubbelt';
-
   const dg=el('div','done-grid');
-  const revealed=slots.filter(i=>done.includes(i));
-  const hidden  =slots.filter(i=>!done.includes(i));
-  revealed.forEach(i=>{
+  slots.filter(i=>done.includes(i)).forEach(i=>{
     const d=el('div','done-thumb');
-    const im=el('img'); im.src=IMAGE_PATHS[i]; im.alt='';
-    d.appendChild(im); dg.appendChild(d);
+    const im=el('img'); im.src=IMAGE_PATHS[i]; im.alt=''; d.appendChild(im); dg.appendChild(d);
   });
-  hidden.forEach(()=>{
+  slots.filter(i=>!done.includes(i)).forEach(()=>{
     const d=el('div','done-thumb blank'); d.textContent='💗'; dg.appendChild(d);
   });
-
   scr.appendChild(heart); scr.appendChild(txt); scr.appendChild(sub); scr.appendChild(dg);
-  box.appendChild(scr);
-  container.appendChild(box);
+  box.appendChild(scr); container.appendChild(box);
 }
 
-// ─── RENDER: WAITING ─────────────────────────────────────────────────────────
 function renderWaiting(panelId){
   const container=document.getElementById(panelId);
   container.innerHTML='';
@@ -367,7 +324,7 @@ function renderWaiting(panelId){
   container.appendChild(box);
 }
 
-// ─── SCRATCH ENGINE ──────────────────────────────────────────────────────────
+// ── SCRATCH ENGINE ────────────────────────────────────────────────────────────
 function initScratch(canvas, lotEl, imgIdx, day){
   const w=lotEl.offsetWidth, h=lotEl.offsetHeight;
   if(!w||!h){ setTimeout(()=>initScratch(canvas,lotEl,imgIdx,day),80); return; }
@@ -379,17 +336,16 @@ function initScratch(canvas, lotEl, imgIdx, day){
   const ctx=canvas.getContext('2d');
   ctx.scale(dpr,dpr);
 
-  // Cover gradient
-  const grd=ctx.createLinearGradient(0,0,w,h);
-  grd.addColorStop(0,'#2a1028'); grd.addColorStop(.5,'#4a1942'); grd.addColorStop(1,'#1a0a18');
-  ctx.fillStyle=grd; ctx.fillRect(0,0,w,h);
+  // Fully opaque cover so image is completely hidden
+  ctx.fillStyle='#1a0a18';
+  ctx.fillRect(0,0,w,h);
 
-  // Heart pattern
+  // Decorative heart pattern
   ctx.save(); ctx.globalAlpha=.07; ctx.fillStyle='#c4607a'; ctx.font='18px serif';
   for(let x=12;x<w;x+=36) for(let y=18;y<h;y+=32) ctx.fillText('♥',x,y);
   ctx.restore();
 
-  // Hint
+  // Hint text
   ctx.save();
   ctx.fillStyle='#e8a0b0'; ctx.globalAlpha=.85;
   ctx.font='300 11px Lato,sans-serif'; ctx.textAlign='center';
@@ -398,10 +354,11 @@ function initScratch(canvas, lotEl, imgIdx, day){
   ctx.fillText('um zu enthüllen', w/2, h/2+10);
   ctx.restore();
 
+  // Now switch to erasing mode
   ctx.globalCompositeOperation='destination-out';
 
-  let isDown=false, done=false;
-  const brush=Math.max(18,Math.min(w*.12,42));
+  let isDown=false, revealDone=false;
+  const brush=Math.max(18, Math.min(w*.13, 46));
 
   function pos(e){
     const r=canvas.getBoundingClientRect();
@@ -410,13 +367,16 @@ function initScratch(canvas, lotEl, imgIdx, day){
   }
   function scratch(x,y){
     ctx.beginPath(); ctx.arc(x,y,brush,0,Math.PI*2); ctx.fill();
-    if(!done) checkReveal();
+    if(!revealDone) checkReveal();
   }
   function checkReveal(){
     const px=ctx.getImageData(0,0,canvas.width,canvas.height).data;
     let clear=0;
     for(let i=3;i<px.length;i+=4) if(px[i]<128) clear++;
-    if(clear/(canvas.width*canvas.height)*100>55){ done=true; onReveal(canvas,lotEl,imgIdx,day); }
+    if(clear/(canvas.width*canvas.height)*100 > 55){
+      revealDone=true;
+      onReveal(canvas, lotEl, imgIdx, day);
+    }
   }
 
   canvas.addEventListener('mousedown',e=>{isDown=true;const p=pos(e);scratch(p.x,p.y)});
@@ -429,46 +389,38 @@ function initScratch(canvas, lotEl, imgIdx, day){
 }
 
 function onReveal(canvas, lotEl, imgIdx, day){
-  canvas.classList.add('done');
-  setTimeout(()=>{ if(canvas.parentNode) canvas.remove(); },800);
-
+  // Fade out canvas, show image underneath
+  canvas.classList.add('fading');
   lotEl.classList.add('revealed');
+  setTimeout(()=>{ if(canvas.parentNode) canvas.remove(); }, 800);
 
   // Update state
   if(day==='fri'){
     if(!friDone.includes(imgIdx)) friDone.push(imgIdx);
-    if(friDone.length>=3) friClosed=true;
+    // FIX: Only close after exactly 3 reveals
+    if(friDone.length >= 3) friClosed = true;
   } else {
     if(!sunDone.includes(imgIdx)) sunDone.push(imgIdx);
-    if(sunDone.length>=3) sunClosed=true;
+    if(sunDone.length >= 3) sunClosed = true;
   }
   save();
 
-  const done=day==='fri'?friDone:sunDone;
-  const cnt=document.getElementById('cnt-'+day);
-  if(cnt) cnt.textContent=done.length;
+  const done = day==='fri' ? friDone : sunDone;
+  const cnt  = document.getElementById('cnt-'+day);
+  if(cnt) cnt.textContent = done.length;
 
-  const left=3-done.length;
-  showToast(left>0?`Enthüllt ✨ Noch ${left} übrig`:'Alle 3 Lose gerubbelt 💗');
-
-  // Re-render after short delay to lock remaining + show done screen
-  if(done.length>=3){
-    setTimeout(()=>{ if(day==='fri') renderFri(); else renderSun(); }, 1100);
+  const left = 3 - done.length;
+  if(left > 0){
+    showToast(`Enthüllt ✨ Noch ${left} übrig`);
+    // FIX: Do NOT lock anything — just let them pick the next one freely
   } else {
-    // Lock all remaining unscratched lots
-    const panelId=day==='fri'?'panel-fri':'panel-sun';
-    document.querySelectorAll(`#${panelId} .lot:not(.revealed):not(.locked)`).forEach(lot=>{
-      lot.classList.add('locked');
-      const cv=lot.querySelector('.scratch-canvas');
-      if(cv) cv.remove();
-      const ov=el('div','lock-overlay');
-      ov.innerHTML='<span class="lock-icon">🔒</span><span class="lock-text">Heute nicht mehr möglich</span>';
-      lot.appendChild(ov);
-    });
+    showToast('Alle 3 Lose gerubbelt 💗');
+    // After 3rd reveal: re-render to show done state with locks on remaining
+    setTimeout(()=>{ if(day==='fri') renderFri(); else renderSun(); }, 1200);
   }
 }
 
-// ─── ORCHESTRATION ───────────────────────────────────────────────────────────
+// ── ORCHESTRATION ─────────────────────────────────────────────────────────────
 function renderFri(){
   assignFriSlots();
   renderDay('panel-fri','fri');
@@ -478,7 +430,6 @@ function renderSun(){
   assignSunSlots();
   renderDay('panel-sun','sun');
 }
-
 function switchTab(day){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
@@ -486,12 +437,8 @@ function switchTab(day){
   document.getElementById('panel-'+day).classList.add('active');
 }
 
-// ─── UTIL ────────────────────────────────────────────────────────────────────
-function el(tag,cls=''){
-  const e=document.createElement(tag);
-  if(cls) e.className=cls;
-  return e;
-}
+function el(tag,cls=''){const e=document.createElement(tag);if(cls)e.className=cls;return e;}
+
 function buildStars(){
   const c=document.getElementById('stars');
   for(let i=0;i<55;i++){
@@ -501,7 +448,6 @@ function buildStars(){
   }
 }
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
 document.getElementById('fri-date').textContent=getDateLabel(5);
 document.getElementById('sun-date').textContent=getDateLabel(0);
 buildStars();
